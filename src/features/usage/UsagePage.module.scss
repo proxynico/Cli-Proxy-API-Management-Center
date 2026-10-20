@@ -1004,35 +1004,7 @@ $danger: var(--error-color);
   }
 }
 
-/* -------------------------------------------------------------- tabs */
-
-.tabs {
-  display: flex;
-  gap: 2px;
-  margin-top: -4px;
-  border-bottom: 1px solid var(--border-color);
-  overflow-x: auto;
-  scrollbar-width: none;
-
-  button {
-    flex: none;
-    padding: 8px 12px 10px;
-    margin-bottom: -1px;
-    border: 0;
-    border-bottom: 2px solid transparent;
-    background: none;
-    font: inherit;
-    font-size: 14.5px;
-    font-weight: 500;
-    color: var(--text-tertiary, var(--text-secondary));
-    cursor: pointer;
-
-    &[aria-pressed='true'] {
-      border-bottom-color: var(--text-primary);
-      color: var(--text-primary);
-    }
-  }
-}
+/* ---------------------------------------------------- account picker */
 
 .accountSelect {
   max-width: 100%;

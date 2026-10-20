@@ -496,6 +496,11 @@ function WeekDetail({
   const events = handOffEvents(history, group.accounts, start, now);
   const ranOut = events.filter((e) => e.kind === 'ranOut');
 
+  // An account already out at its first reading this week ran out unseen; the lead says so.
+  const outUnread = group.accounts.find((account) => {
+    const first = (history.series[account.name]?.['7d'] ?? []).find((p) => p[0] >= start);
+    return first !== undefined && first[0] <= until && first[1] >= 100;
+  });
   const sole = Object.entries(row.soleCoverMs).sort((a, b) => b[1] - a[1])[0];
   const soleAccount = group.accounts.find((a) => a.name === sole?.[0]);
   const gapFrom = row.firstGap?.from ?? 0;
@@ -514,7 +519,9 @@ function WeekDetail({
             time: formatWhen(ranOut[0].at, now, t),
             cover: soleAccount?.label ?? '',
           })
-        : t('usage.week_lead_clear');
+        : outUnread
+          ? t('usage.week_lead_out_unread', { account: outUnread.label })
+          : t('usage.week_lead_clear');
 
   const hoverMs = fraction === null ? null : start + fraction * WEEK_MS;
   const hoverValues =

@@ -107,12 +107,18 @@
     "config_management": "設定面板",
     "logs": "記錄檢視",
     "system_info": "中心資訊",
-    "usage": "用量預測"
+    "usage_pace": "節奏",
+    "usage_past": "過往視窗",
+    "usage_forecast": "預測",
+    "usage_weeks": "按週",
+    "usage_trends": "趨勢",
+    "usage_bursts": "爆發"
   },
   "nav_groups": {
     "operate": "運行",
     "gateway": "閘道",
     "observe": "觀測",
+    "usage": "用量",
     "plugin_pages": "插件",
     "control": "控制"
   },
@@ -128,7 +134,12 @@
     "logs": "請求追蹤與排查",
     "config_management": "閘道基礎設定",
     "system_info": "運行與診斷資訊",
-    "usage": "額度何時用盡"
+    "usage_pace": "各帳號與均勻節奏對比",
+    "usage_past": "每週重置時剩餘多少",
+    "usage_forecast": "各帳號何時用盡",
+    "usage_weeks": "沒有帳號可用的時段",
+    "usage_trends": "每週用盡時間的變化",
+    "usage_bursts": "吃掉一週額度的那幾個小時"
   },
   "dashboard": {
     "hero_verdict_good": "運行平穩",
@@ -1912,7 +1923,6 @@
     }
   },
   "usage": {
-    "title": "用量預測",
     "meta_other": "{{count}} 個帳號 · 每 {{minutes}} 分鐘讀取",
     "loading": "正在載入用量記錄…",
     "recorder_down": "用量記錄器沒有回應。",
@@ -2034,12 +2044,6 @@
     "allowed_none": "重置前已無額度",
     "days_short": "{{count}} 天",
     "account": "帳號",
-    "page_view": "用量檢視",
-    "view_pace": "節奏",
-    "view_trends": "趨勢",
-    "view_bursts": "爆發",
-    "pace_this_window": "本視窗",
-    "pace_past_windows": "過往視窗",
     "pace_headline_ahead": "{{account}} 是均勻節奏的 {{pace}} 倍",
     "pace_headline_out": "{{account}} 已用盡，直到 {{time}}",
     "pace_headline_behind": "所有帳號都慢於均勻節奏",
@@ -2155,6 +2159,7 @@
     "stat_moved_later": "用盡時間延後了",
     "ran_out_unread": "在開始記錄前已用盡",
     "past_window_out_unread": "在開始記錄前已用滿",
-    "trend_charts_wait": "這些圖會隨著各週結束而補齊。"
+    "trend_charts_wait": "這些圖會隨著各週結束而補齊。",
+    "week_lead_out_unread": "開始記錄時 {{account}} 已經用盡。"
   }
 }

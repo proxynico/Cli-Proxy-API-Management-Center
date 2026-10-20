@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import i18n from '../src/i18n/index';
 import { BurstsPanel } from '../src/features/usage/BurstsPanel';
 import { PacePanel } from '../src/features/usage/PacePanel';
+import { PastWindowsPanel } from '../src/features/usage/PastWindowsPanel';
 import { TrendsPanel } from '../src/features/usage/TrendsPanel';
 import { BURST_LINE, findBursts, hourlyUse } from '../src/features/usage/burstsModel';
 import { accountTrend } from '../src/features/usage/trendsModel';
@@ -166,10 +167,14 @@ describe('panels', () => {
   beforeAll(() => i18n.changeLanguage('en'));
   afterAll(() => i18n.changeLanguage(original));
 
-  test('pace, trends and bursts render from the same history', () => {
+  test('every usage page renders from the same history', () => {
     const pace = renderToStaticMarkup(createElement(PacePanel, props));
     expect(pace).toContain('even pace');
     expect(pace).toContain('data-selected="1"');
+
+    const past = renderToStaticMarkup(createElement(PastWindowsPanel, props));
+    expect(past).toContain('hit the limit');
+    expect(past).toContain('data-peak="hit"');
 
     const trends = renderToStaticMarkup(createElement(TrendsPanel, props));
     expect(trends).toContain('Claude gmail');

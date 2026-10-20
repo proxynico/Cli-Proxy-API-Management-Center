@@ -29,7 +29,14 @@ const createMainRoutes = (supportsPlugin: boolean) => [
   { path: '/auth-files/oauth-model-alias', element: <AuthFilesOAuthModelAliasEditPage /> },
   { path: '/oauth', element: <OAuthPage /> },
   { path: '/quota', element: <QuotaPage /> },
-  { path: '/usage', element: <UsagePage /> },
+  { path: '/usage', element: <Navigate to="/usage/pace" replace /> },
+  { path: '/usage/pace', element: <UsagePage view="pace" /> },
+  { path: '/usage/past', element: <UsagePage view="past" /> },
+  { path: '/usage/forecast', element: <UsagePage view="forecast" /> },
+  { path: '/usage/weeks', element: <UsagePage view="weeks" /> },
+  { path: '/usage/trends', element: <UsagePage view="trends" /> },
+  { path: '/usage/bursts', element: <UsagePage view="bursts" /> },
+  { path: '/usage/*', element: <Navigate to="/usage/pace" replace /> },
   ...(supportsPlugin
     ? [
         { path: '/plugin-pages/:pluginId/:menuIndex', element: <PluginResourcePage /> },

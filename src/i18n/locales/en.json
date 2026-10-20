@@ -107,12 +107,18 @@
     "config_management": "Config Panel",
     "logs": "Logs Viewer",
     "system_info": "Management Center Info",
-    "usage": "Usage forecast"
+    "usage_pace": "Pace",
+    "usage_past": "Past windows",
+    "usage_forecast": "Forecast",
+    "usage_weeks": "Weeks",
+    "usage_trends": "Trends",
+    "usage_bursts": "Bursts"
   },
   "nav_groups": {
     "operate": "Operate",
     "gateway": "Gateway",
     "observe": "Observe",
+    "usage": "Usage",
     "plugin_pages": "Plugins",
     "control": "Control"
   },
@@ -128,7 +134,12 @@
     "logs": "Request tracing",
     "config_management": "Gateway configuration",
     "system_info": "Runtime & diagnostics",
-    "usage": "When limits run out"
+    "usage_pace": "Every account against the even pace",
+    "usage_past": "What each week left unused",
+    "usage_forecast": "When each account runs out",
+    "usage_weeks": "Hours with no account free",
+    "usage_trends": "Run-outs week over week",
+    "usage_bursts": "The hours that eat a week"
   },
   "dashboard": {
     "hero_verdict_good": "All systems steady",
@@ -1888,7 +1899,6 @@
     }
   },
   "usage": {
-    "title": "Usage forecast",
     "meta_one": "{{count}} account · read every {{minutes}} min",
     "meta_other": "{{count}} accounts · read every {{minutes}} min",
     "loading": "Loading the usage history…",
@@ -2019,12 +2029,6 @@
     "allowed_none": "Nothing left until the reset",
     "days_short": "{{count}} d",
     "account": "Account",
-    "page_view": "Usage view",
-    "view_pace": "Pace",
-    "view_trends": "Trends",
-    "view_bursts": "Bursts",
-    "pace_this_window": "This window",
-    "pace_past_windows": "Past windows",
     "pace_headline_ahead": "{{account}} is {{pace}}× ahead of even pace",
     "pace_headline_out": "{{account}} is out until {{time}}",
     "pace_headline_behind": "Every account is behind even pace",
@@ -2150,6 +2154,7 @@
     "stat_moved_later": "Run-out moved later by",
     "ran_out_unread": "Ran out before readings began",
     "past_window_out_unread": "Hit the limit before readings began",
-    "trend_charts_wait": "These fill in as weeks finish."
+    "trend_charts_wait": "These fill in as weeks finish.",
+    "week_lead_out_unread": "{{account}} was already out when readings began."
   }
 }

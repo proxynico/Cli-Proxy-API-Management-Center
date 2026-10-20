@@ -31,6 +31,11 @@ import {
   IconSidebarSystem,
   IconChevronDown,
   IconTimer,
+  IconUsageBursts,
+  IconUsageHistory,
+  IconUsagePace,
+  IconUsageTrends,
+  IconUsageWeeks,
 } from '@/components/ui/icons';
 import { INLINE_LOGO_JPEG } from '@/assets/logoInline';
 import {
@@ -61,7 +66,12 @@ const sidebarIcons: Record<string, ReactNode> = {
   authFiles: <IconSidebarAuthFiles size={18} />,
   oauth: <IconSidebarOauth size={18} />,
   quota: <IconSidebarQuota size={18} />,
-  usage: <IconTimer size={18} />,
+  usagePace: <IconUsagePace size={18} />,
+  usagePast: <IconUsageHistory size={18} />,
+  usageForecast: <IconTimer size={18} />,
+  usageWeeks: <IconUsageWeeks size={18} />,
+  usageTrends: <IconUsageTrends size={18} />,
+  usageBursts: <IconUsageBursts size={18} />,
   plugins: <IconSidebarPlugins size={18} />,
   pluginStore: <IconSidebarStore size={18} />,
   config: <IconSidebarConfig size={18} />,
@@ -649,18 +659,31 @@ export function MainLayout() {
           icon: sidebarIcons.quota,
         },
         {
-          path: '/usage',
-          labelKey: 'nav.usage',
-          metaKey: 'nav_meta.usage',
-          icon: sidebarIcons.usage,
-        },
-        {
           path: '/logs',
           labelKey: 'nav.logs',
           metaKey: 'nav_meta.logs',
           icon: sidebarIcons.logs,
         },
       ],
+    },
+    {
+      id: 'usage',
+      labelKey: 'nav_groups.usage',
+      items: (
+        [
+          ['pace', 'usagePace'],
+          ['past', 'usagePast'],
+          ['forecast', 'usageForecast'],
+          ['weeks', 'usageWeeks'],
+          ['trends', 'usageTrends'],
+          ['bursts', 'usageBursts'],
+        ] as const
+      ).map(([view, icon]) => ({
+        path: `/usage/${view}`,
+        labelKey: `nav.usage_${view}`,
+        metaKey: `nav_meta.usage_${view}`,
+        icon: sidebarIcons[icon],
+      })),
     },
     {
       id: 'control',

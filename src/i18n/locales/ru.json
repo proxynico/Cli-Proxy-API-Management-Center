@@ -107,12 +107,18 @@
     "config_management": "Панель конфигурации",
     "logs": "Просмотр логов",
     "system_info": "Информация системы",
-    "usage": "Прогноз расхода"
+    "usage_pace": "Темп",
+    "usage_past": "Прошлые окна",
+    "usage_forecast": "Прогноз",
+    "usage_weeks": "Недели",
+    "usage_trends": "Тренды",
+    "usage_bursts": "Всплески"
   },
   "nav_groups": {
     "operate": "Работа",
     "gateway": "Шлюз",
     "observe": "Наблюдение",
+    "usage": "Расход",
     "control": "Управление"
   },
   "nav_meta": {
@@ -127,7 +133,12 @@
     "logs": "Трассировка запросов",
     "config_management": "Базовая конфигурация шлюза",
     "system_info": "Состояние и диагностика",
-    "usage": "Когда закончатся лимиты"
+    "usage_pace": "Все аккаунты против равномерного темпа",
+    "usage_past": "Сколько осталось к сбросу",
+    "usage_forecast": "Когда закончится каждый аккаунт",
+    "usage_weeks": "Часы без свободного аккаунта",
+    "usage_trends": "Исчерпание от недели к неделе",
+    "usage_bursts": "Часы, съедающие неделю"
   },
   "dashboard": {
     "hero_verdict_good": "Всё стабильно",
@@ -1882,7 +1893,6 @@
     }
   },
   "usage": {
-    "title": "Прогноз расхода",
     "meta_one": "{{count}} аккаунт · опрос каждые {{minutes}} мин",
     "meta_few": "{{count}} аккаунта · опрос каждые {{minutes}} мин",
     "meta_many": "{{count}} аккаунтов · опрос каждые {{minutes}} мин",
@@ -2031,12 +2041,6 @@
     "allowed_none": "До сброса ничего не осталось",
     "days_short": "{{count}} д",
     "account": "Аккаунт",
-    "page_view": "Вид расхода",
-    "view_pace": "Темп",
-    "view_trends": "Тренды",
-    "view_bursts": "Всплески",
-    "pace_this_window": "Это окно",
-    "pace_past_windows": "Прошлые окна",
     "pace_headline_ahead": "{{account}}: {{pace}}× от равномерного темпа",
     "pace_headline_out": "{{account}} исчерпан до {{time}}",
     "pace_headline_behind": "Все аккаунты медленнее равномерного темпа",
@@ -2182,6 +2186,7 @@
     "stat_moved_later": "Исчерпание сдвинулось позже на",
     "ran_out_unread": "Закончился до начала записи",
     "past_window_out_unread": "Упёрся в лимит до начала записи",
-    "trend_charts_wait": "Графики заполнятся по мере завершения недель."
+    "trend_charts_wait": "Графики заполнятся по мере завершения недель.",
+    "week_lead_out_unread": "{{account}} был исчерпан уже к началу записи."
   }
 }

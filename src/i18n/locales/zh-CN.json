@@ -107,12 +107,18 @@
     "config_management": "配置面板",
     "logs": "日志查看",
     "system_info": "中心信息",
-    "usage": "用量预测"
+    "usage_pace": "节奏",
+    "usage_past": "过往窗口",
+    "usage_forecast": "预测",
+    "usage_weeks": "按周",
+    "usage_trends": "趋势",
+    "usage_bursts": "爆发"
   },
   "nav_groups": {
     "operate": "运行",
     "gateway": "网关",
     "observe": "观测",
+    "usage": "用量",
     "plugin_pages": "插件",
     "control": "控制"
   },
@@ -128,7 +134,12 @@
     "logs": "请求追踪与排查",
     "config_management": "网关基础配置",
     "system_info": "运行与诊断信息",
-    "usage": "额度何时用尽"
+    "usage_pace": "各账号与均匀节奏对比",
+    "usage_past": "每周重置时剩余多少",
+    "usage_forecast": "各账号何时用尽",
+    "usage_weeks": "没有账号可用的时段",
+    "usage_trends": "每周用尽时间的变化",
+    "usage_bursts": "吃掉一周额度的那几个小时"
   },
   "dashboard": {
     "hero_verdict_good": "运行平稳",
@@ -1886,7 +1897,6 @@
     }
   },
   "usage": {
-    "title": "用量预测",
     "meta_other": "{{count}} 个账号 · 每 {{minutes}} 分钟读取",
     "loading": "正在加载用量记录…",
     "recorder_down": "用量记录器没有响应。",
@@ -2008,12 +2018,6 @@
     "allowed_none": "重置前已无额度",
     "days_short": "{{count}} 天",
     "account": "账号",
-    "page_view": "用量视图",
-    "view_pace": "节奏",
-    "view_trends": "趋势",
-    "view_bursts": "爆发",
-    "pace_this_window": "本窗口",
-    "pace_past_windows": "过往窗口",
     "pace_headline_ahead": "{{account}} 是均匀节奏的 {{pace}} 倍",
     "pace_headline_out": "{{account}} 已用尽，直到 {{time}}",
     "pace_headline_behind": "所有账号都慢于均匀节奏",
@@ -2129,6 +2133,7 @@
     "stat_moved_later": "用尽时间推迟了",
     "ran_out_unread": "在开始记录前已用尽",
     "past_window_out_unread": "在开始记录前已用满",
-    "trend_charts_wait": "这些图会随着各周结束而补全。"
+    "trend_charts_wait": "这些图会随着各周结束而补全。",
+    "week_lead_out_unread": "开始记录时 {{account}} 已经用尽。"
   }
 }

@@ -1,6 +1,7 @@
 /**
- * Usage: how fast each account spends its week, when it runs out, whether a
- * provider kept an account free, and how that changes week to week.
+ * Usage pages: how fast each account spends its week, when it runs out,
+ * whether a provider kept an account free, and how that changes week to week.
+ * Each view is its own page in the sidebar.
  *
  * Reads the history the mini's usage recorder keeps. The recorder listens on
  * the proxy's own loopback, so the page reaches it through the management
@@ -17,6 +18,7 @@ import type { UsageHistory } from './usageModel';
 import { BurstsPanel } from './BurstsPanel';
 import { ForecastPanel } from './ForecastPanel';
 import { PacePanel } from './PacePanel';
+import { PastWindowsPanel } from './PastWindowsPanel';
 import { TrendsPanel } from './TrendsPanel';
 import { WeeksPanel } from './WeeksPanel';
 import styles from './UsagePage.module.scss';
@@ -27,28 +29,11 @@ const RECORDER_URL =
   'http://127.0.0.1:8320/history.json';
 const RELOAD_MS = 5 * 60_000;
 
-const VIEWS = ['pace', 'forecast', 'weeks', 'trends', 'bursts'] as const;
-type PageView = (typeof VIEWS)[number];
-/**
- * The view sits in the address so a reload opens the same one. The page
- * transition hands pages only path changes, so the page keeps the view itself
- * and writes the address alongside, keeping the router's history state.
- */
-const viewFromAddress = (): PageView => {
-  const asked = new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('view');
-  return VIEWS.find((v) => v === asked) ?? 'pace';
-};
-const writeView = (view: PageView) => {
-  const path = window.location.hash.split('?')[0] || '#/usage';
-  window.history.replaceState(
-    window.history.state,
-    '',
-    view === 'pace' ? path : `${path}?view=${view}`
-  );
-};
+export type UsageView = 'pace' | 'past' | 'forecast' | 'weeks' | 'trends' | 'bursts';
 
 const PANELS = {
   pace: PacePanel,
+  past: PastWindowsPanel,
   forecast: ForecastPanel,
   weeks: WeeksPanel,
   trends: TrendsPanel,
@@ -60,8 +45,13 @@ type LoadState =
   | { status: 'error'; message: string }
   | { status: 'ready'; history: UsageHistory };
 
+// The last good history outlives the page, so moving between usage pages shows it at once.
+let lastHistory: UsageHistory | null = null;
+
 function useUsageHistory() {
-  const [state, setState] = useState<LoadState>({ status: 'loading' });
+  const [state, setState] = useState<LoadState>(() =>
+    lastHistory ? { status: 'ready', history: lastHistory } : { status: 'loading' }
+  );
 
   const load = useCallback(async () => {
     try {
@@ -69,6 +59,7 @@ function useUsageHistory() {
       if (result.statusCode !== 200) throw new Error(`HTTP ${result.statusCode}`);
       const history = parseUsageHistory(result.body);
       if (!history) throw new Error('unreadable history');
+      lastHistory = history;
       setState({ status: 'ready', history });
     } catch (error) {
       setState((previous) =>
@@ -89,12 +80,11 @@ function useUsageHistory() {
   return state;
 }
 
-export function UsagePage() {
+export function UsagePage({ view }: { view: UsageView }) {
   const { t } = useTranslation();
   const state = useUsageHistory();
   const now = useNow();
   const resolvedTheme = useThemeStore((store) => store.resolvedTheme);
-  const [view, setView] = useState<PageView>(viewFromAddress);
   const Panel = PANELS[view];
   const accounts = useMemo(
     () => (state.status === 'ready' ? accountViews(state.history) : []),
@@ -104,7 +94,7 @@ export function UsagePage() {
   return (
     <div className={styles.page}>
       <header className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>{t('usage.title')}</h1>
+        <h1 className={styles.pageTitle}>{t(`nav.usage_${view}`)}</h1>
         {state.status === 'ready' && (
           <p className={styles.pageMeta}>
             {t('usage.meta', {
@@ -132,24 +122,7 @@ export function UsagePage() {
         </div>
       )}
       {state.status === 'ready' && accounts.length > 0 && (
-        <>
-          <nav className={styles.tabs} aria-label={t('usage.page_view')}>
-            {VIEWS.map((v) => (
-              <button
-                key={v}
-                type="button"
-                aria-pressed={v === view}
-                onClick={() => {
-                  setView(v);
-                  writeView(v);
-                }}
-              >
-                {t(`usage.view_${v}`)}
-              </button>
-            ))}
-          </nav>
-          <Panel history={state.history} accounts={accounts} now={now} theme={resolvedTheme} />
-        </>
+        <Panel history={state.history} accounts={accounts} now={now} theme={resolvedTheme} />
       )}
     </div>
   );

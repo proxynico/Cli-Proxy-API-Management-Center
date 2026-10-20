@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The mini's usage recorder. Install: cp to ~/Library/LaunchAgents, then
+  launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/nico.cliproxy-usage.plist
+  It starts through dita-mini-launchd-root.applescript so macOS judges its
+  NicoDev drive access as osascript, which never raises a prompt. Restarts wait
+  a minute because each start reads every account, and Anthropic refuses more
+  than one limits check per account per minute.
+-->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>nico.cliproxy-usage</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/osascript</string>
+		<string>/Users/nicomini/bin/dita-mini-launchd-root.applescript</string>
+		<string>/Users/nicomini/Library/Logs/cliproxy-usage.log</string>
+		<string>/Users/nicomini/Library/Logs/cliproxy-usage.err</string>
+		<string>/Users/nicomini/.bun/bin/bun</string>
+		<string>run</string>
+		<string>/Volumes/NicoDev/Developer/lab/cliproxy-dashboard/usage-recorder/recorder.ts</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>HOME</key>
+		<string>/Users/nicomini</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>60</integer>
+	<key>StandardOutPath</key>
+	<string>/Users/nicomini/Library/Logs/cliproxy-usage.launchd.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/nicomini/Library/Logs/cliproxy-usage.launchd.err</string>
+</dict>
+</plist>

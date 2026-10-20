@@ -1,6 +1,6 @@
 /**
- * Usage: when each account runs out, and whether a provider kept an account
- * free week by week.
+ * Usage: how fast each account spends its week, when it runs out, whether a
+ * provider kept an account free, and how that changes week to week.
  *
  * Reads the history the mini's usage recorder keeps. The recorder listens on
  * the proxy's own loopback, so the page reaches it through the management
@@ -14,7 +14,10 @@ import { useNow } from '@/hooks/useNow';
 import { useThemeStore } from '@/stores';
 import { accountViews, parseUsageHistory } from './usageModel';
 import type { UsageHistory } from './usageModel';
+import { BurstsPanel } from './BurstsPanel';
 import { ForecastPanel } from './ForecastPanel';
+import { PacePanel } from './PacePanel';
+import { TrendsPanel } from './TrendsPanel';
 import { WeeksPanel } from './WeeksPanel';
 import styles from './UsagePage.module.scss';
 
@@ -23,6 +26,34 @@ const RECORDER_URL =
   (import.meta.env.VITE_USAGE_HISTORY_URL as string | undefined) ||
   'http://127.0.0.1:8320/history.json';
 const RELOAD_MS = 5 * 60_000;
+
+const VIEWS = ['pace', 'forecast', 'weeks', 'trends', 'bursts'] as const;
+type PageView = (typeof VIEWS)[number];
+/**
+ * The view sits in the address so a reload opens the same one. The page
+ * transition hands pages only path changes, so the page keeps the view itself
+ * and writes the address alongside, keeping the router's history state.
+ */
+const viewFromAddress = (): PageView => {
+  const asked = new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('view');
+  return VIEWS.find((v) => v === asked) ?? 'pace';
+};
+const writeView = (view: PageView) => {
+  const path = window.location.hash.split('?')[0] || '#/usage';
+  window.history.replaceState(
+    window.history.state,
+    '',
+    view === 'pace' ? path : `${path}?view=${view}`
+  );
+};
+
+const PANELS = {
+  pace: PacePanel,
+  forecast: ForecastPanel,
+  weeks: WeeksPanel,
+  trends: TrendsPanel,
+  bursts: BurstsPanel,
+} as const;
 
 type LoadState =
   | { status: 'loading' }
@@ -63,6 +94,8 @@ export function UsagePage() {
   const state = useUsageHistory();
   const now = useNow();
   const resolvedTheme = useThemeStore((store) => store.resolvedTheme);
+  const [view, setView] = useState<PageView>(viewFromAddress);
+  const Panel = PANELS[view];
   const accounts = useMemo(
     () => (state.status === 'ready' ? accountViews(state.history) : []),
     [state]
@@ -100,13 +133,22 @@ export function UsagePage() {
       )}
       {state.status === 'ready' && accounts.length > 0 && (
         <>
-          <ForecastPanel
-            history={state.history}
-            accounts={accounts}
-            now={now}
-            theme={resolvedTheme}
-          />
-          <WeeksPanel history={state.history} accounts={accounts} now={now} theme={resolvedTheme} />
+          <nav className={styles.tabs} aria-label={t('usage.page_view')}>
+            {VIEWS.map((v) => (
+              <button
+                key={v}
+                type="button"
+                aria-pressed={v === view}
+                onClick={() => {
+                  setView(v);
+                  writeView(v);
+                }}
+              >
+                {t(`usage.view_${v}`)}
+              </button>
+            ))}
+          </nav>
+          <Panel history={state.history} accounts={accounts} now={now} theme={resolvedTheme} />
         </>
       )}
     </div>

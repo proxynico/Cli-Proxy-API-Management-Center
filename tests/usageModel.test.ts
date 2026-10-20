@@ -122,6 +122,19 @@ describe('forecastAccount', () => {
     expect(forecast?.usedAtReset).toBeCloseTo(5 + 5 * ((resetMs - now) / DAY), 1);
   });
 
+  test('reads the last day across a reset, so a new window keeps its pace', () => {
+    // A point an hour all day, then the window resets at 10:00 and goes on the same way.
+    const history = one([
+      ...series(at(19, 10), at(20, 9, 30), (t) => [(t - at(19, 10)) / H, at(20, 10)]),
+      ...series(at(20, 10), at(20, 12), (t) => [(t - at(20, 10)) / H, at(27, 10)]),
+    ]);
+    const forecast = forecastAccount(history, accountViews(history)[0], at(20, 12));
+    expect(forecast?.kind).toBe('runsOut');
+    // 21.5 points before the reset and 2 after it in the last 24 hours, not 2 in 2 hours.
+    expect(forecast?.rate).toBeCloseTo(23.5 / (24 * H), 12);
+    expect(forecast?.runOutMs).toBeCloseTo(at(20, 12) + (98 / (23.5 / 24)) * H, -4);
+  });
+
   test('says nothing without a current reading', () => {
     expect(forecastOf(series(at(19, 0), at(19, 12), () => [10, resetMs]))).toBeNull();
   });

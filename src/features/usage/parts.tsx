@@ -1,11 +1,11 @@
 /**
- * Small pieces both usage panels share.
+ * Small pieces the usage panels share.
  */
 
 import type { ReactNode } from 'react';
-import { AUTH_FILE_ICONS } from '@/features/authFiles/constants';
 import type { ResolvedTheme } from '@/types';
 import type { UsageProvider } from './usageModel';
+import { providerIconSrc } from './icons';
 import styles from './UsagePage.module.scss';
 
 export function ProviderIcon({
@@ -17,10 +17,37 @@ export function ProviderIcon({
   theme: ResolvedTheme;
   size?: number;
 }) {
-  const asset = AUTH_FILE_ICONS[provider];
-  if (!asset) return null;
-  const src = typeof asset === 'string' ? asset : theme === 'dark' ? asset.dark : asset.light;
+  const src = providerIconSrc(provider, theme);
+  if (!src) return null;
   return <img className={styles.providerIcon} src={src} width={size} height={size} alt="" />;
+}
+
+/** An account picker for panels that show one account at a time. */
+export function AccountSelect({
+  accounts,
+  value,
+  onChange,
+  label,
+}: {
+  accounts: { name: string; label: string }[];
+  value: string;
+  onChange: (name: string) => void;
+  label: string;
+}) {
+  return (
+    <select
+      className={styles.accountSelect}
+      value={value}
+      aria-label={label}
+      onChange={(event) => onChange(event.target.value)}
+    >
+      {accounts.map((account) => (
+        <option key={account.name} value={account.name}>
+          {account.label}
+        </option>
+      ))}
+    </select>
+  );
 }
 
 export function Segmented<T extends string>({

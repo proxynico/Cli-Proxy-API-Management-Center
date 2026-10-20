@@ -1004,6 +1004,688 @@ $danger: var(--error-color);
   }
 }
 
+/* -------------------------------------------------------------- tabs */
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin-top: -4px;
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  button {
+    flex: none;
+    padding: 8px 12px 10px;
+    margin-bottom: -1px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    font: inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--text-tertiary, var(--text-secondary));
+    cursor: pointer;
+
+    &[aria-pressed='true'] {
+      border-bottom-color: var(--text-primary);
+      color: var(--text-primary);
+    }
+  }
+}
+
+.accountSelect {
+  max-width: 100%;
+  padding: 7px 32px 7px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background-color: var(--bg-tertiary);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 17px) 52%,
+    calc(100% - 12px) 52%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  appearance: none;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+/* -------------------------------------------------------------- pace */
+
+.paceChart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.aheadArea {
+  fill: ink(2.5%);
+}
+
+.gridLine[data-faint='1'] {
+  opacity: 0.5;
+}
+
+.resetLine {
+  stroke: ink(30%);
+  stroke-width: 1;
+}
+
+.unreadLine {
+  fill: none;
+  stroke: ink(26%);
+  stroke-width: 1.3;
+  stroke-dasharray: 1 4;
+  stroke-linecap: round;
+}
+
+.paceSeries {
+  .accountLine {
+    stroke: ink(36%);
+    stroke-width: 1.5;
+  }
+
+  .paceLine {
+    stroke: ink(36%);
+  }
+
+  &[data-selected='1'] {
+    .accountLine {
+      stroke: var(--text-primary);
+      stroke-width: 2.2;
+    }
+
+    .paceLine {
+      stroke: ink(85%);
+    }
+  }
+}
+
+.paceMarker {
+  fill: var(--bg-primary);
+  stroke: ink(50%);
+  stroke-width: 2;
+
+  .paceSeries[data-selected='1'] & {
+    fill: var(--text-primary);
+    stroke: var(--bg-primary);
+  }
+}
+
+.paceLabel text {
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-tertiary, var(--text-secondary));
+  paint-order: stroke;
+  stroke: var(--bg-primary);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.paceLabel[data-selected='1'] text {
+  fill: var(--text-primary);
+}
+
+.chartLabelDanger {
+  font-size: 11.5px;
+  font-weight: 600;
+  fill: $danger;
+}
+
+.bigPace {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+
+  b {
+    font-size: 44px;
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+
+    &[data-tone='danger'] {
+      font-size: 24px;
+      color: $danger;
+    }
+  }
+
+  span {
+    font-size: 15px;
+    color: var(--text-secondary);
+  }
+}
+
+.stats[data-columns='2'] {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.detailCaption {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.paceList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  button {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    color: var(--text-secondary);
+    cursor: pointer;
+
+    &[aria-pressed='true'] {
+      background: ink(6%);
+    }
+  }
+}
+
+.paceListName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.paceListPace {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.paceListOutcome {
+  min-width: 96px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+
+  &[data-tone='danger'] {
+    color: $danger;
+  }
+}
+
+.swatchUnread {
+  height: 0;
+  border-top: 2px dotted ink(35%);
+  border-radius: 0;
+}
+
+/* ------------------------------------------------------ past windows */
+
+.pastAxis {
+  position: relative;
+  height: 16px;
+
+  span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
+
+.pastTrack {
+  position: relative;
+  height: 34px;
+  cursor: pointer;
+}
+
+@mixin peak-ramp {
+  background: ink(12%);
+
+  &[data-peak='1'] {
+    background: ink(24%);
+  }
+  &[data-peak='2'] {
+    background: ink(40%);
+  }
+  &[data-peak='3'] {
+    background: ink(62%);
+    color: var(--bg-primary);
+  }
+  &[data-peak='hit'] {
+    background: danger(80%);
+  }
+}
+
+.pastWindow {
+  @include peak-ramp;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+
+  // The current window so far: its colour, faded, behind a dashed edge.
+  &[data-current='1'] {
+    opacity: 0.6;
+    outline: 1.5px dashed ink(55%);
+    outline-offset: -1.5px;
+  }
+
+  &[data-unread='1'] {
+    opacity: 0.55;
+  }
+}
+
+.pastSwatch {
+  @include peak-ramp;
+  display: inline-block;
+  width: 14px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.swatchCurrent {
+  outline: 1.5px dashed ink(40%);
+  outline-offset: -1.5px;
+}
+
+.windowList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 9px 0;
+    border-top: 1px solid var(--border-color);
+    font-size: 13.5px;
+    color: var(--text-secondary);
+
+    > span:first-child {
+      font-weight: 550;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-primary);
+    }
+
+    small {
+      margin-left: 8px;
+      font-weight: 400;
+      color: var(--text-quaternary);
+    }
+
+    &[data-hit='1'] > span:last-child {
+      color: $danger;
+    }
+  }
+}
+
+/* ------------------------------------------------------------ trends */
+
+.weekLabel[data-static='1'],
+.track[data-static='1'] {
+  cursor: default;
+}
+
+.row[data-current='1'] {
+  background: ink(3%);
+}
+
+.cell[data-projected='1'] {
+  opacity: 0.45;
+}
+
+.runOutDot[data-projected='1'] {
+  background: var(--bg-primary);
+  box-shadow:
+    inset 0 0 0 2px $danger,
+    0 0 0 2px var(--bg-primary);
+}
+
+.swatchProjected {
+  background: ink(14%);
+  outline: 1px dashed ink(55%);
+  outline-offset: -1px;
+}
+
+.barWithin[data-projected='1'],
+.barOver[data-projected='1'] {
+  fill-opacity: 0.4;
+  stroke: ink(60%);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+}
+
+.measuredDot {
+  fill: var(--text-primary);
+  stroke: var(--bg-primary);
+  stroke-width: 2;
+}
+
+.projectedDot {
+  fill: var(--bg-primary);
+  stroke: var(--text-primary);
+  stroke-width: 1.6;
+}
+
+.lastedDot {
+  fill: none;
+  stroke: ink(40%);
+  stroke-width: 1.4;
+}
+
+.swatchMeasured {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--text-primary);
+}
+
+.swatchLasted {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px ink(40%);
+}
+
+.subChart[data-flush='1'] {
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* ------------------------------------------------------------ bursts */
+
+$drum-row: 30px;
+
+.drum {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.drumAxis,
+.drumRow {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) 44px;
+  gap: 12px;
+  align-items: end;
+}
+
+.drumAxis {
+  position: relative;
+  z-index: 4;
+  padding-bottom: 30px;
+  font-size: 12px;
+  color: var(--text-tertiary, var(--text-secondary));
+}
+
+.drumHours {
+  position: relative;
+  height: 16px;
+
+  span {
+    position: absolute;
+    transform: translateX(-50%);
+
+    &:first-child {
+      transform: none;
+    }
+
+    &[data-minor='1'] {
+      opacity: 0.6;
+    }
+  }
+}
+
+.drumTotalHead {
+  text-align: right;
+}
+
+.drumRow {
+  height: $drum-row;
+}
+
+.drumDate,
+.drumTotal {
+  padding-bottom: 1px;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text-tertiary, var(--text-secondary));
+}
+
+.drumDate b {
+  font-weight: 550;
+  color: var(--text-secondary);
+}
+
+.drumRow[data-weekend='1'] .drumDate {
+  opacity: 0.6;
+}
+
+.drumTotal {
+  text-align: right;
+  color: var(--text-secondary);
+}
+
+.drumTrack {
+  position: relative;
+  height: 100%;
+}
+
+.drumWork {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: ink(3%);
+}
+
+.drumLine {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 260%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.drumUnread {
+  stroke: ink(30%);
+  stroke-width: 1;
+  stroke-dasharray: 1 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.drumRidge {
+  fill: var(--bg-primary);
+  stroke: ink(48%);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.drumBurst {
+  fill: none;
+  stroke: var(--text-primary);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+
+  &[data-selected='1'] {
+    stroke-width: 3;
+  }
+}
+
+.drumLocked {
+  @include hatch;
+  position: absolute;
+  bottom: 0;
+  height: 7px;
+  border-bottom: 2px solid danger(80%);
+}
+
+.drumReset {
+  position: absolute;
+  bottom: -2px;
+  z-index: 2;
+  width: 2px;
+  height: 18px;
+  transform: translateX(-50%);
+  border-radius: 1px;
+  background: var(--text-primary);
+
+  span {
+    position: absolute;
+    left: 5px;
+    bottom: 5px;
+    padding: 0 3px;
+    border-radius: 3px;
+    background: var(--bg-primary);
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+}
+
+.drumRanOut,
+.drumNow {
+  position: absolute;
+  bottom: 0;
+  z-index: 3;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--bg-primary);
+}
+
+.drumRanOut {
+  width: 9px;
+  height: 9px;
+  transform: translate(-50%, 50%);
+  background: $danger;
+}
+
+.drumNow {
+  width: 7px;
+  height: 7px;
+  transform: translate(-50%, 50%);
+  background: var(--text-primary);
+}
+
+.burstLabel {
+  position: absolute;
+  z-index: 5;
+  padding: 1px 5px;
+  transform: translate(-50%, -4px);
+  border: 0;
+  border-radius: 5px;
+  background: var(--bg-primary);
+  box-shadow: 0 0 0 1px ink(14%);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text-primary);
+  cursor: pointer;
+
+  &[data-selected='1'] {
+    background: var(--text-primary);
+    color: var(--bg-primary);
+  }
+}
+
+.swatchHourLine {
+  height: 0;
+  border-top: 1.5px solid ink(50%);
+  border-radius: 0;
+}
+
+.burstBand {
+  fill: ink(5%);
+}
+
+.quietDot {
+  fill: ink(45%);
+}
+
+.barBursts,
+.swatchBursts {
+  fill: ink(62%);
+  background: ink(62%);
+}
+
+.barOther,
+.swatchOther {
+  fill: ink(24%);
+  background: ink(24%);
+}
+
+[data-current='1'] > .barBursts,
+[data-current='1'] > .barOther {
+  fill-opacity: 0.55;
+}
+
+.burstList {
+  max-height: 260px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+
+  button {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 6px;
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    background: none;
+    font: inherit;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    text-align: left;
+    color: var(--text-secondary);
+    cursor: pointer;
+
+    b {
+      font-weight: 600;
+      white-space: nowrap;
+      color: var(--text-primary);
+    }
+
+    &[aria-pressed='true'] {
+      background: ink(5%);
+    }
+  }
+}
+
 /* ------------------------------------------------------------ narrow */
 
 @media (max-width: 1180px) {
@@ -1059,7 +1741,7 @@ $danger: var(--error-color);
       grid-template-columns: minmax(0, 1fr);
       grid-template-areas: 'track';
 
-      > :not(.axisDays) {
+      > :not(.axisDays):not(.pastAxis) {
         display: none;
       }
     }
@@ -1086,8 +1768,29 @@ $danger: var(--error-color);
   .track,
   .weekTracks,
   .axisDays,
+  .pastAxis,
+  .pastTrack,
   .singleText {
     grid-area: track;
+  }
+
+  .drumAxis,
+  .drumRow {
+    grid-template-columns: 44px minmax(0, 1fr) 30px;
+    gap: 8px;
+  }
+
+  .drumDate,
+  .drumTotal {
+    font-size: 11px;
+  }
+
+  .burstLabel {
+    font-size: 10.5px;
+  }
+
+  .bigPace b {
+    font-size: 36px;
   }
 
   .weekLabel {

@@ -157,6 +157,88 @@ export function lockedAt(
   return known ? false : null;
 }
 
+/* ------------------------------------------------------------- windows */
+
+/** Providers report a window's reset a minute apart between readings; within this it's one window. */
+const RESET_SLACK_MS = 10 * MINUTE_MS;
+export const sameWindow = (a: number, b: number) => Math.abs(a - b) <= RESET_SLACK_MS;
+
+export interface UsageWindow {
+  /** Where a full window would have begun. */
+  startMs: number;
+  resetMs: number;
+  /** When it actually ended: its reset, or earlier when the provider began a new window early. */
+  endMs: number;
+  endedEarly: boolean;
+  current: boolean;
+  points: Point[];
+  firstAt: number;
+  lastAt: number;
+  peak: number;
+  /** The first reading at 100%: locked from then on, at least. */
+  lockedFrom: number | null;
+  /** When it was seen running out; null when it was already out at its first reading. */
+  ranOutAt: number | null;
+  /** Readings begin with the window, so its whole use is known. */
+  fromStart: boolean;
+  /** Readings reach its end, so the peak is what it finished at. */
+  toEnd: boolean;
+}
+
+/**
+ * When a window's readings saw it run out: its first reading at 100%, if a
+ * reading below 100% came before it or the readings began with the window.
+ * A window already out when the recorder first read it ran out at some unseen
+ * moment, and saying when would be invented.
+ */
+export function seenRunOut(points: readonly Point[], startMs: number, staleMs: number) {
+  const index = points.findIndex((point) => point[1] >= 100);
+  if (index < 0) return null;
+  return index > 0 || points[0][0] - startMs <= staleMs ? points[index][0] : null;
+}
+
+/** An account's readings split into its windows, oldest first. */
+export function windowsOf(
+  points: readonly Point[],
+  now: number,
+  staleMs: number,
+  lengthMs = WEEK_MS
+): UsageWindow[] {
+  const groups: Point[][] = [];
+  for (const point of points) {
+    const group = groups[groups.length - 1];
+    if (group && sameWindow(group[group.length - 1][2], point[2])) group.push(point);
+    else groups.push([point]);
+  }
+
+  return groups.map((group, i) => {
+    const resetMs = group[group.length - 1][2];
+    const startMs = resetMs - lengthMs;
+    const next = groups[i + 1];
+    const endedEarly = next !== undefined && next[0][0] < resetMs - RESET_SLACK_MS;
+    const endMs = endedEarly ? next[0][0] : resetMs;
+    const firstAt = group[0][0];
+    const lastAt = group[group.length - 1][0];
+    const current = !next && resetMs > now;
+    const ranOut = group.find((point) => point[1] >= 100);
+    return {
+      startMs,
+      resetMs,
+      endMs,
+      endedEarly,
+      current,
+      points: group,
+      firstAt,
+      lastAt,
+      peak: Math.max(...group.map((point) => point[1])),
+      lockedFrom: ranOut ? ranOut[0] : null,
+      ranOutAt: seenRunOut(group, startMs, staleMs),
+      fromStart: firstAt - startMs <= staleMs,
+      toEnd: ranOut !== undefined || (!current && endMs - lastAt <= staleMs),
+    };
+  });
+}
+
 /* ------------------------------------------------------------ accounts */
 
 export interface AccountView {
@@ -230,6 +312,11 @@ export interface AccountForecast {
 
 /** Recent pace needs this much recorded span; below it the window average is all there is. */
 const RECENT_MIN_MS = 6 * HOUR_MS;
+/**
+ * The window average spreads over at least this long, so a window an hour old
+ * with one busy hour doesn't forecast a run-out by tomorrow.
+ */
+const MIN_AVERAGE_MS = 12 * HOUR_MS;
 
 /**
  * Forecast an account's weekly window at the pace of the last day.
@@ -249,17 +336,25 @@ export function forecastAccount(
 
   const resetMs = last[2];
   const startMs = resetMs - WEEK_MS;
-  const points = all.filter((point) => point[2] === resetMs);
+  const points = all.filter((point) => sameWindow(point[2], resetMs) && point[0] >= startMs);
   const used = last[1];
   const elapsed = Math.max(now - startMs, 1);
   const pace = used / ((elapsed / WEEK_MS) * 100);
 
-  const firstAt = points[0]?.[0] ?? now;
-  let rate = used / elapsed;
-  if (now - firstAt >= RECENT_MIN_MS) {
-    const from = Math.max(now - DAY_MS, firstAt);
-    const before = readingAt(points, from, Infinity) ?? points[0];
-    rate = Math.max(0, (used - before[1]) / (now - from));
+  // The last day is read across a reset, so a window that just began still has
+  // a day of pace behind it; a new window's first reading is all new use.
+  const recordedFrom = all[0]?.[0] ?? now;
+  let rate = used / Math.max(elapsed, MIN_AVERAGE_MS);
+  if (now - recordedFrom >= RECENT_MIN_MS) {
+    const from = Math.max(now - DAY_MS, recordedFrom);
+    let previous = readingAt(all, from, Infinity) ?? all[0];
+    let rise = 0;
+    for (const point of all) {
+      if (point[0] <= from || point[0] > now) continue;
+      rise += sameWindow(previous[2], point[2]) ? Math.max(0, point[1] - previous[1]) : point[1];
+      previous = point;
+    }
+    rate = rise / (now - from);
   }
 
   const remaining = Math.max(0, 100 - used);

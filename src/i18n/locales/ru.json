@@ -2040,7 +2040,6 @@
     "event_free_again": "Аккаунт {{provider}} снова свободен",
     "allowed_none": "До сброса ничего не осталось",
     "days_short": "{{count}} д",
-    "account": "Аккаунт",
     "pace_headline_ahead": "{{account}}: {{pace}}× от равномерного темпа",
     "pace_headline_out": "{{account}} исчерпан до {{time}}",
     "pace_headline_behind": "Все аккаунты медленнее равномерного темпа",
@@ -2100,15 +2099,6 @@
     "trend_note": "Одна строка на недельное окно, ячейки по 6 часов. Точка — момент исчерпания, полая — прогноз.",
     "this_window": "это окно",
     "this_window_short": "Сейчас",
-    "trend_headline_wait_one": "Тренды появятся после {{count}} записанной недели",
-    "trend_headline_wait_few": "Тренды появятся после {{count}} записанных недель",
-    "trend_headline_wait_many": "Тренды появятся после {{count}} записанных недель",
-    "trend_headline_wait_other": "Тренды появятся после {{count}} записанных недель",
-    "trend_sub_have_one": "У {{account}} пока {{count}} законченная неделя.",
-    "trend_sub_have_few": "У {{account}} пока {{count}} законченные недели.",
-    "trend_sub_have_many": "У {{account}} пока {{count}} законченных недель.",
-    "trend_sub_have_other": "У {{account}} пока {{count}} законченной недели.",
-    "trend_sub_ready": "Первый тренд ожидается около {{date}}.",
     "trend_headline_earlier_one": "{{account}} заканчивается на {{duration}} раньше, чем {{count}} неделю назад",
     "trend_headline_earlier_few": "{{account}} заканчивается на {{duration}} раньше, чем {{count}} недели назад",
     "trend_headline_earlier_many": "{{account}} заканчивается на {{duration}} раньше, чем {{count}} недель назад",
@@ -2187,6 +2177,10 @@
     "ran_out_unread": "Закончился до начала записи",
     "past_window_out_unread": "Упёрся в лимит до начала записи",
     "trend_charts_wait": "Графики заполнятся по мере завершения недель.",
-    "week_lead_out_unread": "{{account}} был исчерпан уже к началу записи."
+    "week_lead_out_unread": "{{account}} был исчерпан уже к началу записи.",
+    "trend_headline_due": "Первый тренд {{account}} ожидается около {{date}}",
+    "trend_headline_wait": "Для тренда {{account}} нужно больше записанных недель",
+    "trend_sub_progress": "Записано законченных недель: {{have}} из {{needed}}, нужных для тренда.",
+    "bursts_headline_out": "{{account}} исчерпан до {{time}}, расхода для графика нет"
   }
 }

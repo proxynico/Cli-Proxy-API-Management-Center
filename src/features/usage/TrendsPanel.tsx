@@ -1,9 +1,10 @@
 /**
- * Trends: one account's weekly windows side by side, so a run-out creeping
- * earlier week after week shows, with the growth that moves it.
+ * Trends: each account's weekly windows side by side, so a run-out creeping
+ * earlier week after week shows, with the growth that moves it. Every account
+ * shows at once, one card each.
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { ResolvedTheme } from '@/types';
@@ -28,7 +29,7 @@ import type {
 import { MIN_TREND_WINDOWS, accountTrend } from './trendsModel';
 import type { AccountTrend, WindowTrend } from './trendsModel';
 import { formatDuration, formatMonthDay, formatTime, formatWhen, weekday } from './format';
-import { AccountSelect, LegendItem, ProviderIcon, Stat } from './parts';
+import { LegendItem, ProviderIcon, Stat } from './parts';
 import styles from './UsagePage.module.scss';
 
 interface Props {
@@ -61,90 +62,115 @@ export function TrendsPanel({ history, accounts, now, theme }: Props) {
     }));
   }, [history, accounts, now]);
 
-  // Start on the account with the most run-outs to compare; the most finished weeks after that.
-  const ranOutCount = (e: Entry) =>
-    e.trend.windows.filter((w) => w.window.lockedFrom !== null).length;
-  const finishedCount = (e: Entry) =>
-    e.trend.windows.filter((w) => !w.window.current && w.rate !== null).length;
-  const fallback = [...entries].sort(
-    (a, b) => ranOutCount(b) - ranOutCount(a) || finishedCount(b) - finishedCount(a)
-  )[0];
-  const [selected, setSelected] = useState<string | null>(null);
-  const entry = entries.find((e) => e.account.name === selected) ?? fallback;
-  if (!entry) return null;
-
-  const { headline, sub } = trendHeadline(entry, t, i18n.language);
-  const rows = entry.trend.windows.slice(-MAX_ROWS);
-  const reference = rows[rows.length - 1]?.window.startMs ?? now;
+  const firstFull = entries.find((e) => !e.trend.idle && e.trend.windows.length > 0);
 
   return (
-    <section className={styles.card}>
-      <header className={styles.cardHead}>
-        <div>
-          <h2 className={styles.headline}>{headline}</h2>
-          {sub && <p className={styles.subline}>{sub}</p>}
-        </div>
-        <AccountSelect
-          label={t('usage.account')}
-          accounts={entries.map((e) => e.account)}
-          value={entry.account.name}
-          onChange={setSelected}
+    <>
+      {entries.map((entry) => (
+        <TrendCard
+          key={entry.account.name}
+          entry={entry}
+          showLegend={entry === firstFull}
+          history={history}
+          now={now}
+          theme={theme}
+          t={t}
+          language={i18n.language}
         />
+      ))}
+    </>
+  );
+}
+
+/** One account's card; an idle account, or one with no readings, gets its headline alone. */
+function TrendCard({
+  entry,
+  showLegend,
+  history,
+  now,
+  theme,
+  t,
+  language,
+}: {
+  entry: Entry;
+  showLegend: boolean;
+  history: UsageHistory;
+  now: number;
+  theme: ResolvedTheme;
+  t: TFunction;
+  language: string;
+}) {
+  const { headline, sub } = trendHeadline(entry, t, language);
+  const rows = entry.trend.windows.slice(-MAX_ROWS);
+  const reference = rows[rows.length - 1]?.window.startMs ?? now;
+  const compact = entry.trend.idle || rows.length === 0;
+
+  return (
+    <section className={styles.card} data-compact={compact ? 1 : 0}>
+      <header className={styles.cardHead}>
+        <div className={styles.cardTitle}>
+          <ProviderIcon provider={entry.account.provider} theme={theme} size={22} />
+          <div>
+            <h2 className={styles.headline}>{headline}</h2>
+            {sub && <p className={styles.subline}>{sub}</p>}
+          </div>
+        </div>
       </header>
 
-      <div className={styles.layout}>
-        <div className={styles.main}>
-          <div className={styles.scroller}>
-            <div className={styles.forecastGrid}>
-              <div className={styles.axisRow}>
-                <span className={styles.axisCaption}>{t('usage.trend_window_from')}</span>
-                <div className={styles.axisDays}>
-                  {Array.from({ length: 7 }, (_, day) => (
-                    <span key={day}>{weekday(reference + day * DAY_MS, t)}</span>
-                  ))}
+      {!compact && (
+        <div className={styles.layout}>
+          <div className={styles.main}>
+            <div className={styles.scroller}>
+              <div className={styles.forecastGrid}>
+                <div className={styles.axisRow}>
+                  <span className={styles.axisCaption}>{t('usage.trend_window_from')}</span>
+                  <div className={styles.axisDays}>
+                    {Array.from({ length: 7 }, (_, day) => (
+                      <span key={day}>{weekday(reference + day * DAY_MS, t)}</span>
+                    ))}
+                  </div>
+                  <span className={styles.axisCaption}>{t('usage.trend_run_out')}</span>
                 </div>
-                <span className={styles.axisCaption}>{t('usage.trend_run_out')}</span>
+                {rows.map((row, i) => (
+                  <TrendRow
+                    key={row.window.resetMs}
+                    row={row}
+                    previous={rows
+                      .slice(0, i)
+                      .reverse()
+                      .find((r) => r.ranOutAfterMs !== null)}
+                    forecast={row.window.current ? entry.forecast : null}
+                    history={history}
+                    now={now}
+                    t={t}
+                    language={language}
+                  />
+                ))}
               </div>
-              {rows.length === 0 && (
-                <div className={styles.row}>
-                  <span className={styles.muted}>{t('usage.no_readings')}</span>
-                </div>
-              )}
-              {rows.map((row, i) => (
-                <TrendRow
-                  key={row.window.resetMs}
-                  row={row}
-                  previous={rows
-                    .slice(0, i)
-                    .reverse()
-                    .find((r) => r.ranOutAfterMs !== null)}
-                  forecast={row.window.current ? entry.forecast : null}
-                  history={history}
-                  now={now}
-                  t={t}
-                  language={i18n.language}
-                />
-              ))}
             </div>
+            {showLegend && (
+              <footer className={styles.legend}>
+                <span className={styles.legendGroup}>
+                  {t('usage.legend_use')}
+                  {[0, 1, 2, 3].map((level) => (
+                    <span key={level} className={styles.cell} data-state="use" data-level={level} />
+                  ))}
+                  {t('usage.legend_levels')}
+                </span>
+                <LegendItem swatch={styles.swatchRunsOut}>{t('usage.legend_runs_out')}</LegendItem>
+                <LegendItem swatch={styles.swatchLocked}>{t('usage.legend_locked')}</LegendItem>
+                <LegendItem swatch={styles.swatchProjected}>
+                  {t('usage.legend_forecast')}
+                </LegendItem>
+                <LegendItem swatch={styles.swatchNone}>{t('usage.legend_no_reading')}</LegendItem>
+                <span className={styles.legendNote}>{t('usage.trend_note')}</span>
+              </footer>
+            )}
           </div>
-          <footer className={styles.legend}>
-            <span className={styles.legendGroup}>
-              {t('usage.legend_use')}
-              {[0, 1, 2, 3].map((level) => (
-                <span key={level} className={styles.cell} data-state="use" data-level={level} />
-              ))}
-              {t('usage.legend_levels')}
-            </span>
-            <LegendItem swatch={styles.swatchRunsOut}>{t('usage.legend_runs_out')}</LegendItem>
-            <LegendItem swatch={styles.swatchLocked}>{t('usage.legend_locked')}</LegendItem>
-            <LegendItem swatch={styles.swatchProjected}>{t('usage.legend_forecast')}</LegendItem>
-            <LegendItem swatch={styles.swatchNone}>{t('usage.legend_no_reading')}</LegendItem>
-            <span className={styles.legendNote}>{t('usage.trend_note')}</span>
-          </footer>
-        </div>
 
-        <TrendDetail entry={entry} theme={theme} t={t} language={i18n.language} />
-      </div>
+          <TrendDetail entry={entry} theme={theme} t={t} language={language} />
+        </div>
+      )}
     </section>
   );
 }
@@ -168,13 +194,13 @@ function trendHeadline(entry: Entry, t: TFunction, language: string) {
       ? current.resetMs + Math.max(0, MIN_TREND_WINDOWS - finished - pending) * WEEK_MS
       : null;
     return {
-      headline: t('usage.trend_headline_wait', { count: MIN_TREND_WINDOWS }),
-      sub: [
-        t('usage.trend_sub_have', { account: account.label, count: finished }),
-        ready ? t('usage.trend_sub_ready', { date: formatMonthDay(ready, language) }) : '',
-      ]
-        .filter(Boolean)
-        .join(' '),
+      headline: ready
+        ? t('usage.trend_headline_due', {
+            account: account.label,
+            date: formatMonthDay(ready, language),
+          })
+        : t('usage.trend_headline_wait', { account: account.label }),
+      sub: t('usage.trend_sub_progress', { have: finished, needed: MIN_TREND_WINDOWS }),
     };
   }
 

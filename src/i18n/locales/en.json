@@ -2028,7 +2028,6 @@
     "event_free_again": "A {{provider}} account is free again",
     "allowed_none": "Nothing left until the reset",
     "days_short": "{{count}} d",
-    "account": "Account",
     "pace_headline_ahead": "{{account}} is {{pace}}× ahead of even pace",
     "pace_headline_out": "{{account}} is out until {{time}}",
     "pace_headline_behind": "Every account is behind even pace",
@@ -2080,11 +2079,6 @@
     "trend_note": "One row per weekly window, 6-hour cells. The dot is when it ran out; hollow is the forecast.",
     "this_window": "this window",
     "this_window_short": "Now",
-    "trend_headline_wait_one": "Trends start once {{count}} week is recorded",
-    "trend_headline_wait_other": "Trends start once {{count}} weeks are recorded",
-    "trend_sub_have_one": "{{account}} has {{count}} finished week so far.",
-    "trend_sub_have_other": "{{account}} has {{count}} finished weeks so far.",
-    "trend_sub_ready": "Expect the first trend around {{date}}.",
     "trend_headline_earlier_one": "{{account}} runs out {{duration}} earlier than {{count}} week ago",
     "trend_headline_earlier_other": "{{account}} runs out {{duration}} earlier than {{count}} weeks ago",
     "trend_headline_later_one": "{{account}} runs out {{duration}} later than {{count}} week ago",
@@ -2155,6 +2149,10 @@
     "ran_out_unread": "Ran out before readings began",
     "past_window_out_unread": "Hit the limit before readings began",
     "trend_charts_wait": "These fill in as weeks finish.",
-    "week_lead_out_unread": "{{account}} was already out when readings began."
+    "week_lead_out_unread": "{{account}} was already out when readings began.",
+    "trend_headline_due": "{{account}}'s first trend is due around {{date}}",
+    "trend_headline_wait": "{{account}} needs more recorded weeks for a trend",
+    "trend_sub_progress": "Finished weeks recorded: {{have}} of the {{needed}} a trend needs.",
+    "bursts_headline_out": "{{account}} is out until {{time}}, so it has no use to chart"
   }
 }

@@ -2043,7 +2043,6 @@
     "event_free_again": "{{provider}} 重新有可用帳號",
     "allowed_none": "重置前已無額度",
     "days_short": "{{count}} 天",
-    "account": "帳號",
     "pace_headline_ahead": "{{account}} 是均勻節奏的 {{pace}} 倍",
     "pace_headline_out": "{{account}} 已用盡，直到 {{time}}",
     "pace_headline_behind": "所有帳號都慢於均勻節奏",
@@ -2091,9 +2090,6 @@
     "trend_note": "每列一個週視窗，每格 6 小時。圓點是用盡時間，空心為預測。",
     "this_window": "本視窗",
     "this_window_short": "現在",
-    "trend_headline_wait_other": "記錄滿 {{count}} 週後開始顯示趨勢",
-    "trend_sub_have_other": "{{account}} 目前有 {{count}} 個完整的週。",
-    "trend_sub_ready": "第一條趨勢預計在 {{date}} 左右出現。",
     "trend_headline_earlier_other": "{{account}} 比 {{count}} 週前早 {{duration}} 用盡",
     "trend_headline_later_other": "{{account}} 比 {{count}} 週前晚 {{duration}} 用盡",
     "trend_headline_irregular": "{{account}} 每週用量起伏太大，無法預測",
@@ -2160,6 +2156,10 @@
     "ran_out_unread": "在開始記錄前已用盡",
     "past_window_out_unread": "在開始記錄前已用滿",
     "trend_charts_wait": "這些圖會隨著各週結束而補齊。",
-    "week_lead_out_unread": "開始記錄時 {{account}} 已經用盡。"
+    "week_lead_out_unread": "開始記錄時 {{account}} 已經用盡。",
+    "trend_headline_due": "{{account}} 的第一條趨勢預計在 {{date}} 左右出現",
+    "trend_headline_wait": "{{account}} 需要記錄更多週才能顯示趨勢",
+    "trend_sub_progress": "已記錄完整的週：{{have}}，趨勢需要 {{needed}}。",
+    "bursts_headline_out": "{{account}} 已用盡，直到 {{time}}，暫無用量可畫"
   }
 }

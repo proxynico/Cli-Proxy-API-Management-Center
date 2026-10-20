@@ -1,7 +1,7 @@
 /**
- * Bursts: one account's use hour by hour, a line per day, so the few hours
+ * Bursts: each account's use hour by hour, a line per day, so the few hours
  * that spend most of a week stand out, and whether they came while another
- * account was out.
+ * account was out. Every account shows at once, one card each.
  */
 
 import { useId, useMemo, useState } from 'react';
@@ -20,8 +20,8 @@ import {
   windowSplits,
 } from './burstsModel';
 import type { Burst, BurstDay, HourUse, WindowSplit } from './burstsModel';
-import { formatMonthDay, formatTime, weekday } from './format';
-import { AccountSelect, HatchPattern, LegendItem, ProviderIcon, Stat } from './parts';
+import { formatMonthDay, formatTime, formatWhen, weekday } from './format';
+import { HatchPattern, LegendItem, ProviderIcon, Stat } from './parts';
 import styles from './UsagePage.module.scss';
 
 interface Props {
@@ -89,108 +89,155 @@ export function BurstsPanel({ history, accounts, now, theme }: Props) {
     });
   }, [history, accounts, now]);
 
-  // Start on the account whose use is most bursty, among those used at all.
-  const share = (e: Entry) =>
-    e.used >= QUIET ? e.bursts.reduce((sum, b) => sum + b.used, 0) / e.used : -1;
-  const fallback = [...entries].sort((a, b) => share(b) - share(a) || b.used - a.used)[0];
-  const [selected, setSelected] = useState<string | null>(null);
-  const [burstAt, setBurstAt] = useState<number | null>(null);
-  const entry = entries.find((e) => e.account.name === selected) ?? fallback;
-  if (!entry) return null;
-
-  const biggest = [...entry.bursts].sort((a, b) => b.used - a.used)[0] ?? null;
-  const burst = entry.bursts.find((b) => b.start === burstAt) ?? biggest;
-  const { headline, sub } = burstHeadline(entry, biggest, t, i18n.language);
+  // One scale for every account, so a tall line means the same use on each card.
   const scale = Math.max(
     BURST_LINE * 2,
-    Math.ceil(Math.max(0, ...entry.hours.map((h) => h.used ?? 0)) / RISE_ROWS)
+    Math.ceil(Math.max(0, ...entries.flatMap((e) => e.hours.map((h) => h.used ?? 0))) / RISE_ROWS)
   );
+  const firstFull = entries.find((e) => e.used >= QUIET);
 
   return (
-    <section className={styles.card}>
-      <header className={styles.cardHead}>
-        <div>
-          <h2 className={styles.headline}>{headline}</h2>
-          {sub && <p className={styles.subline}>{sub}</p>}
-        </div>
-        <AccountSelect
-          label={t('usage.account')}
-          accounts={entries.map((e) => e.account)}
-          value={entry.account.name}
-          onChange={(name) => {
-            setSelected(name);
-            setBurstAt(null);
-          }}
-        />
-      </header>
-
-      <div className={styles.layout}>
-        <div className={styles.main}>
-          <div className={styles.drum}>
-            <div className={styles.drumAxis}>
-              <span />
-              <div className={styles.drumHours}>
-                {[0, 3, 6, 9, 12, 15, 18, 21].map((hour) => (
-                  <span
-                    key={hour}
-                    style={{ left: `${(hour / 24) * 100}%` }}
-                    data-minor={hour % 6 ? 1 : 0}
-                  >
-                    {String(hour).padStart(2, '0')}
-                  </span>
-                ))}
-              </div>
-              <span className={styles.drumTotalHead}>{t('usage.bursts_per_day')}</span>
-            </div>
-            {entry.days.map((day) => (
-              <DrumRow
-                key={day.dayStart}
-                day={day}
-                bursts={entry.bursts}
-                windows={entry.windows}
-                scale={scale}
-                selected={burst}
-                onSelect={setBurstAt}
-                now={now}
-                t={t}
-              />
-            ))}
-          </div>
-          <footer className={styles.legend}>
-            <LegendItem swatch={styles.swatchHourLine}>
-              {t('usage.legend_hour_line', { value: pct(scale) })}
-            </LegendItem>
-            <LegendItem swatch={styles.swatchUsed}>{t('usage.legend_burst')}</LegendItem>
-            <LegendItem swatch={styles.swatchLocked}>{t('usage.legend_locked_short')}</LegendItem>
-            <LegendItem swatch={styles.swatchRunsOutDot}>{t('usage.legend_ran_out')}</LegendItem>
-            <LegendItem swatch={styles.swatchReset}>{t('usage.legend_reset')}</LegendItem>
-            <LegendItem swatch={styles.swatchUnread}>{t('usage.legend_no_reading')}</LegendItem>
-            <LegendItem swatch={styles.swatchWork}>{t('usage.legend_work_hours')}</LegendItem>
-            <span className={styles.legendNote}>
-              {t('usage.bursts_note', { value: pct(BURST_LINE) })}
-            </span>
-          </footer>
-        </div>
-
-        <BurstDetail
+    <>
+      {entries.map((entry) => (
+        <BurstCard
+          key={entry.account.name}
           entry={entry}
-          burst={burst}
-          onSelect={setBurstAt}
+          scale={scale}
+          showLegend={entry === firstFull}
+          now={now}
           theme={theme}
           t={t}
           language={i18n.language}
         />
-      </div>
+      ))}
+    </>
+  );
+}
+
+/** One account's card; an account barely used gets its headline alone. */
+function BurstCard({
+  entry,
+  scale,
+  showLegend,
+  now,
+  theme,
+  t,
+  language,
+}: {
+  entry: Entry;
+  scale: number;
+  showLegend: boolean;
+  now: number;
+  theme: ResolvedTheme;
+  t: TFunction;
+  language: string;
+}) {
+  const [burstAt, setBurstAt] = useState<number | null>(null);
+  const biggest = [...entry.bursts].sort((a, b) => b.used - a.used)[0] ?? null;
+  const burst = entry.bursts.find((b) => b.start === burstAt) ?? biggest;
+  const { headline, sub } = burstHeadline(entry, biggest, now, t, language);
+  const quiet = entry.used < QUIET;
+
+  return (
+    <section className={styles.card} data-compact={quiet ? 1 : 0}>
+      <header className={styles.cardHead}>
+        <div className={styles.cardTitle}>
+          <ProviderIcon provider={entry.account.provider} theme={theme} size={22} />
+          <div>
+            <h2 className={styles.headline}>{headline}</h2>
+            {sub && <p className={styles.subline}>{sub}</p>}
+          </div>
+        </div>
+      </header>
+
+      {!quiet && (
+        <div className={styles.layout}>
+          <div className={styles.main}>
+            <div className={styles.drum}>
+              <div className={styles.drumAxis}>
+                <span />
+                <div className={styles.drumHours}>
+                  {[0, 3, 6, 9, 12, 15, 18, 21].map((hour) => (
+                    <span
+                      key={hour}
+                      style={{ left: `${(hour / 24) * 100}%` }}
+                      data-minor={hour % 6 ? 1 : 0}
+                    >
+                      {String(hour).padStart(2, '0')}
+                    </span>
+                  ))}
+                </div>
+                <span className={styles.drumTotalHead}>{t('usage.bursts_per_day')}</span>
+              </div>
+              {entry.days.map((day) => (
+                <DrumRow
+                  key={day.dayStart}
+                  day={day}
+                  bursts={entry.bursts}
+                  windows={entry.windows}
+                  scale={scale}
+                  selected={burst}
+                  onSelect={setBurstAt}
+                  now={now}
+                  t={t}
+                />
+              ))}
+            </div>
+            {showLegend && (
+              <footer className={styles.legend}>
+                <LegendItem swatch={styles.swatchHourLine}>
+                  {t('usage.legend_hour_line', { value: pct(scale) })}
+                </LegendItem>
+                <LegendItem swatch={styles.swatchUsed}>{t('usage.legend_burst')}</LegendItem>
+                <LegendItem swatch={styles.swatchLocked}>
+                  {t('usage.legend_locked_short')}
+                </LegendItem>
+                <LegendItem swatch={styles.swatchRunsOutDot}>
+                  {t('usage.legend_ran_out')}
+                </LegendItem>
+                <LegendItem swatch={styles.swatchReset}>{t('usage.legend_reset')}</LegendItem>
+                <LegendItem swatch={styles.swatchUnread}>{t('usage.legend_no_reading')}</LegendItem>
+                <LegendItem swatch={styles.swatchWork}>{t('usage.legend_work_hours')}</LegendItem>
+                <span className={styles.legendNote}>
+                  {t('usage.bursts_note', { value: pct(BURST_LINE) })}
+                </span>
+              </footer>
+            )}
+          </div>
+
+          <BurstDetail
+            entry={entry}
+            burst={burst}
+            onSelect={setBurstAt}
+            theme={theme}
+            t={t}
+            language={language}
+          />
+        </div>
+      )}
     </section>
   );
 }
 
-function burstHeadline(entry: Entry, biggest: Burst | null, t: TFunction, language: string) {
+function burstHeadline(
+  entry: Entry,
+  biggest: Burst | null,
+  now: number,
+  t: TFunction,
+  language: string
+) {
   const { account, bursts, used } = entry;
-  const since = formatMonthDay(entry.days[0]?.dayStart ?? Date.now(), language);
+  const since = formatMonthDay(entry.days[0]?.dayStart ?? now, language);
   if (used < QUIET) {
+    // Out of its limit is not the same as unused.
+    const out = entry.windows.find((w) => w.current && w.lockedFrom !== null);
     return {
-      headline: t('usage.bursts_headline_quiet', { account: account.label, date: since }),
+      headline: out
+        ? t('usage.bursts_headline_out', {
+            account: account.label,
+            time: formatWhen(out.endMs, now, t),
+          })
+        : t('usage.bursts_headline_quiet', { account: account.label, date: since }),
       sub: '',
     };
   }

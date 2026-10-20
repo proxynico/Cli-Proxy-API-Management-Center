@@ -22,34 +22,6 @@ export function ProviderIcon({
   return <img className={styles.providerIcon} src={src} width={size} height={size} alt="" />;
 }
 
-/** An account picker for panels that show one account at a time. */
-export function AccountSelect({
-  accounts,
-  value,
-  onChange,
-  label,
-}: {
-  accounts: { name: string; label: string }[];
-  value: string;
-  onChange: (name: string) => void;
-  label: string;
-}) {
-  return (
-    <select
-      className={styles.accountSelect}
-      value={value}
-      aria-label={label}
-      onChange={(event) => onChange(event.target.value)}
-    >
-      {accounts.map((account) => (
-        <option key={account.name} value={account.name}>
-          {account.label}
-        </option>
-      ))}
-    </select>
-  );
-}
-
 export function Segmented<T extends string>({
   value,
   options,

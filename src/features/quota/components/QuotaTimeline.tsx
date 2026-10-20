@@ -28,6 +28,9 @@ import {
   DAY_MS,
 } from '../quotaTimelineModel';
 import type { TimelineLane, TimelineMode } from '../quotaTimelineModel';
+import { forecastLane, providerGaps } from '../quotaForecastModel';
+import type { LaneForecast } from '../quotaForecastModel';
+import { providerLabel } from '@/features/dashboard/utils';
 import type { QuotaFileEntry } from '../logic';
 import type { QuotaCardState } from '../providers';
 import styles from './QuotaTimeline.module.scss';
@@ -42,6 +45,15 @@ const formatDay = (ms: number) => {
 const formatTime = (ms: number) => {
   const d = new Date(ms);
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+type Translate = ReturnType<typeof useTranslation>['t'];
+
+/** Weekday and time within the coming week, where a date would only slow reading; the date beyond it. */
+const formatWhen = (ms: number, now: number, t: Translate) => {
+  if (ms - now >= 6 * DAY_MS) return `${formatDay(ms)} ${formatTime(ms)}`;
+  const key = WEEKDAY_KEYS[new Date(ms).getDay()];
+  return `${t(`quota_management.weekday_${key}`, { defaultValue: key })} ${formatTime(ms)}`;
 };
 
 export interface QuotaTimelineProps {
@@ -127,6 +139,13 @@ export function QuotaTimeline({
     [laneInputs, mode, span.days]
   );
 
+  const forecasts = useMemo(
+    () => lanes.map((lane) => ({ lane, forecast: forecastLane(lane, now) })),
+    [lanes, now]
+  );
+  const gaps = useMemo(() => providerGaps(forecasts), [forecasts]);
+  const unknownProvider = t('dashboard.provider_unknown');
+
   /** Weekly: one cell per day. Session: one per 6 hours. */
   const cells = useMemo(() => {
     const zoomed = mode === 'session';
@@ -175,6 +194,22 @@ export function QuotaTimeline({
             {offset === 0 &&
               ` · ${t('quota_management.windows_current', { defaultValue: 'current' })}`}
           </p>
+          {gaps.map((gap) => (
+            <p key={gap.provider} className={styles.gap}>
+              {gap.fromMs <= now
+                ? t('quota_management.windows_forecast_gap_now', {
+                    defaultValue: 'No {{provider}} account free until {{to}}',
+                    provider: providerLabel(gap.provider, unknownProvider),
+                    to: formatWhen(gap.toMs, now, t),
+                  })
+                : t('quota_management.windows_forecast_gap', {
+                    defaultValue: 'No {{provider}} account free {{from}} – {{to}}',
+                    provider: providerLabel(gap.provider, unknownProvider),
+                    from: formatWhen(gap.fromMs, now, t),
+                    to: formatWhen(gap.toMs, now, t),
+                  })}
+            </p>
+          ))}
         </div>
 
         <div className={styles.controls}>
@@ -255,10 +290,11 @@ export function QuotaTimeline({
               </div>
             </div>
 
-            {lanes.map((lane) => (
+            {forecasts.map(({ lane, forecast }) => (
               <Lane
                 key={lane.name}
                 lane={lane}
+                forecast={forecast}
                 span={span}
                 now={now}
                 mode={mode}
@@ -291,6 +327,12 @@ export function QuotaTimeline({
               defaultValue: 'manual reset expiry',
             })}
           </span>
+          <span className={styles.legendItem}>
+            <span className={`${styles.swatch} ${styles.swatchLocked}`} />
+            {t('quota_management.windows_legend_locked', {
+              defaultValue: 'locked until reset (forecast)',
+            })}
+          </span>
           <span className={styles.legendNote}>
             {mode === 'weekly'
               ? t('quota_management.windows_note_weekly', {
@@ -310,6 +352,7 @@ export function QuotaTimeline({
 
 interface LaneProps {
   lane: TimelineLane;
+  forecast: LaneForecast | null;
   span: { startMs: number; endMs: number; days: number };
   now: number;
   mode: TimelineMode;
@@ -318,8 +361,41 @@ interface LaneProps {
   resolvedTheme: ResolvedTheme;
 }
 
-function Lane({ lane, span, now, mode, cells, nowPercent, resolvedTheme }: LaneProps) {
+function Lane({ lane, forecast, span, now, mode, cells, nowPercent, resolvedTheme }: LaneProps) {
   const { t, i18n } = useTranslation();
+
+  // The forecast lock drawn over the current window, clipped to the span.
+  const toSpanPercent = (ms: number) => ((ms - span.startMs) / (span.endMs - span.startMs)) * 100;
+  const lock =
+    forecast && forecast.kind !== 'holds'
+      ? {
+          left: Math.max(0, toSpanPercent(forecast.lockedFromMs)),
+          right: Math.min(100, toSpanPercent(forecast.resetMs)),
+          title: t('quota_management.windows_forecast_locked', {
+            defaultValue: 'Locked {{from}} – {{to}}',
+            from: formatWhen(forecast.lockedFromMs, now, t),
+            to: formatWhen(forecast.resetMs, now, t),
+          }),
+        }
+      : null;
+  const runOutPercent = forecast?.kind === 'runsOut' ? toSpanPercent(forecast.lockedFromMs) : null;
+
+  const forecastText = !forecast
+    ? null
+    : forecast.kind === 'out'
+      ? t('quota_management.windows_forecast_out', {
+          defaultValue: 'Out until {{time}}',
+          time: formatWhen(forecast.resetMs, now, t),
+        })
+      : forecast.kind === 'runsOut'
+        ? t('quota_management.windows_forecast_runs_out', {
+            defaultValue: 'Runs out {{time}}',
+            time: formatWhen(forecast.lockedFromMs, now, t),
+          })
+        : t('quota_management.windows_forecast_holds', {
+            defaultValue: '~{{percent}}% used at reset',
+            percent: Math.round(forecast.usedAtReset),
+          });
 
   const windows = useMemo(
     () => projectLane(lane, span.startMs, span.endMs, now, mode),
@@ -357,11 +433,29 @@ function Lane({ lane, span, now, mode, cells, nowPercent, resolvedTheme }: LaneP
         <div className={styles.laneLimits}>
           {lane.limits.map((limit) => (
             <span key={limit.label} className={styles.laneLimit}>
-              {lane.provider === 'meta' ? t(limit.label) : limit.label}{' '}
-              <b>{limit.remaining}%</b>
+              {lane.provider === 'meta' ? t(limit.label) : limit.label} <b>{limit.remaining}%</b>
             </span>
           ))}
         </div>
+        {forecast && forecastText && (
+          <div className={styles.laneForecast} data-locked={forecast.kind === 'holds' ? 0 : 1}>
+            {forecastText}
+            {forecast.kind !== 'out' && (
+              <span
+                className={styles.lanePace}
+                title={t('quota_management.windows_forecast_pace_hint', {
+                  defaultValue:
+                    'Use so far compared with an even spread over the window. Above 1× runs out before the reset.',
+                })}
+              >
+                {t('quota_management.windows_forecast_pace', {
+                  defaultValue: '{{pace}}× pace',
+                  pace: forecast.pace.toFixed(1),
+                })}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       <div className={styles.track}>
@@ -423,6 +517,19 @@ function Lane({ lane, span, now, mode, cells, nowPercent, resolvedTheme }: LaneP
               </div>
             );
           })
+        )}
+
+        {lock && lock.right > lock.left && (
+          <span
+            className={styles.locked}
+            style={{ left: `${lock.left}%`, width: `${lock.right - lock.left}%` }}
+            title={lock.title}
+            role="img"
+            aria-label={lock.title}
+          />
+        )}
+        {runOutPercent !== null && runOutPercent >= 0 && runOutPercent <= 100 && (
+          <span className={styles.runOutDot} style={{ left: `${runOutPercent}%` }} />
         )}
 
         {resetCredits.map((credit, index) => {

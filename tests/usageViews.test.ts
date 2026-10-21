@@ -4,10 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import i18n from '../src/i18n/index';
 import { BurstsPanel } from '../src/features/usage/BurstsPanel';
 import { PacePanel } from '../src/features/usage/PacePanel';
-import { PastWindowsPanel } from '../src/features/usage/PastWindowsPanel';
-import { TrendsPanel } from '../src/features/usage/TrendsPanel';
 import { BURST_LINE, findBursts, hourlyUse } from '../src/features/usage/burstsModel';
-import { accountTrend } from '../src/features/usage/trendsModel';
 import { accountViews, windowsOf } from '../src/features/usage/usageModel';
 import type { Point, UsageHistory } from '../src/features/usage/usageModel';
 
@@ -55,7 +52,7 @@ describe('windowsOf', () => {
 });
 
 describe('a run-out before the first reading', () => {
-  test('is a lock, with no moment and no rate claimed for it', () => {
+  test('is a lock, with no moment claimed for it', () => {
     // The recorder started on Tuesday; the window began the Wednesday before and was already out.
     const points: Point[] = [
       [at(20, 12, 11), 100, at(21, 11)],
@@ -64,38 +61,6 @@ describe('a run-out before the first reading', () => {
     const [window] = windowsOf(points, at(20, 13), STALE);
     expect(window.lockedFrom).toBe(at(20, 12, 11));
     expect(window.ranOutAt).toBeNull();
-    expect(accountTrend([window], at(20, 13)).windows[0].rate).toBeNull();
-  });
-});
-
-describe('accountTrend', () => {
-  test('a rate rising 10% a week moves the run-out earlier and projects it', () => {
-    const start = at(19, 0) - 4 * WEEK;
-    const points = weeks(start, [20, 22, 24.2, 26.6, 29.3], at(19, 12) + 3 * DAY);
-    const trend = accountTrend(windowsOf(points, at(22, 12), STALE), at(22, 12));
-    expect(trend.growth).toBeCloseTo(0.1, 1);
-    expect(trend.irregular).toBe(false);
-    // 100% at 20 a day is 5 days in; at 29.3 a day, under 3.5.
-    expect(trend.movedMs).toBeLessThan(-36 * H);
-    expect(trend.projections[0].ranOutAfterMs).toBeLessThan(3.5 * DAY);
-  });
-
-  test('an account barely used has no trend to speak of', () => {
-    const start = at(19, 0) - 4 * WEEK;
-    const trend = accountTrend(
-      windowsOf(weeks(start, [0.1, 0.4, 0.1, 0.2], at(19)), at(19, 1), STALE),
-      at(19, 1)
-    );
-    expect(trend.idle).toBe(true);
-    expect(trend.growth).toBe(0);
-  });
-
-  test('says nothing before three finished weeks', () => {
-    const trend = accountTrend(
-      windowsOf(weeks(at(5), [20, 20], at(19)), at(19, 1), STALE),
-      at(19, 1)
-    );
-    expect(trend.growth).toBeNull();
   });
 });
 
@@ -171,14 +136,6 @@ describe('panels', () => {
     const pace = renderToStaticMarkup(createElement(PacePanel, props));
     expect(pace).toContain('even pace');
     expect(pace).toContain('data-selected="1"');
-
-    const past = renderToStaticMarkup(createElement(PastWindowsPanel, props));
-    expect(past).toContain('hit the limit');
-    expect(past).toContain('data-peak="hit"');
-
-    const trends = renderToStaticMarkup(createElement(TrendsPanel, props));
-    expect(trends).toContain('Claude gmail');
-    expect(trends).toContain('Ran out');
 
     const bursts = renderToStaticMarkup(createElement(BurstsPanel, props));
     expect(bursts).toContain('while Claude gmail was out');

@@ -18,8 +18,6 @@ import type { UsageHistory } from './usageModel';
 import { BurstsPanel } from './BurstsPanel';
 import { ForecastPanel } from './ForecastPanel';
 import { PacePanel } from './PacePanel';
-import { PastWindowsPanel } from './PastWindowsPanel';
-import { TrendsPanel } from './TrendsPanel';
 import { WeeksPanel } from './WeeksPanel';
 import styles from './UsagePage.module.scss';
 
@@ -29,14 +27,12 @@ const RECORDER_URL =
   'http://127.0.0.1:8320/history.json';
 const RELOAD_MS = 5 * 60_000;
 
-export type UsageView = 'pace' | 'past' | 'forecast' | 'weeks' | 'trends' | 'bursts';
+export type UsageView = 'pace' | 'forecast' | 'weeks' | 'bursts';
 
 const PANELS = {
   pace: PacePanel,
-  past: PastWindowsPanel,
   forecast: ForecastPanel,
   weeks: WeeksPanel,
-  trends: TrendsPanel,
   bursts: BurstsPanel,
 } as const;
 

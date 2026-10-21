@@ -32,9 +32,7 @@ import {
   IconChevronDown,
   IconTimer,
   IconUsageBursts,
-  IconUsageHistory,
   IconUsagePace,
-  IconUsageTrends,
   IconUsageWeeks,
 } from '@/components/ui/icons';
 import { INLINE_LOGO_JPEG } from '@/assets/logoInline';
@@ -67,10 +65,8 @@ const sidebarIcons: Record<string, ReactNode> = {
   oauth: <IconSidebarOauth size={18} />,
   quota: <IconSidebarQuota size={18} />,
   usagePace: <IconUsagePace size={18} />,
-  usagePast: <IconUsageHistory size={18} />,
   usageForecast: <IconTimer size={18} />,
   usageWeeks: <IconUsageWeeks size={18} />,
-  usageTrends: <IconUsageTrends size={18} />,
   usageBursts: <IconUsageBursts size={18} />,
   plugins: <IconSidebarPlugins size={18} />,
   pluginStore: <IconSidebarStore size={18} />,
@@ -672,10 +668,8 @@ export function MainLayout() {
       items: (
         [
           ['pace', 'usagePace'],
-          ['past', 'usagePast'],
           ['forecast', 'usageForecast'],
           ['weeks', 'usageWeeks'],
-          ['trends', 'usageTrends'],
           ['bursts', 'usageBursts'],
         ] as const
       ).map(([view, icon]) => ({

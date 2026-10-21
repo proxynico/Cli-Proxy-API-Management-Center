@@ -1207,190 +1207,6 @@ $danger: var(--error-color);
   border-radius: 0;
 }
 
-/* ------------------------------------------------------ past windows */
-
-.pastAxis {
-  position: relative;
-  height: 16px;
-
-  span {
-    position: absolute;
-    top: 0;
-    transform: translateX(-50%);
-    font-size: 12px;
-    white-space: nowrap;
-  }
-}
-
-.pastTrack {
-  position: relative;
-  height: 34px;
-  cursor: pointer;
-}
-
-@mixin peak-ramp {
-  background: ink(12%);
-
-  &[data-peak='1'] {
-    background: ink(24%);
-  }
-  &[data-peak='2'] {
-    background: ink(40%);
-  }
-  &[data-peak='3'] {
-    background: ink(62%);
-    color: var(--bg-primary);
-  }
-  &[data-peak='hit'] {
-    background: danger(80%);
-  }
-}
-
-.pastWindow {
-  @include peak-ramp;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border-radius: 5px;
-  font-size: 11.5px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-
-  // The current window so far: its colour, faded, behind a dashed edge.
-  &[data-current='1'] {
-    opacity: 0.6;
-    outline: 1.5px dashed ink(55%);
-    outline-offset: -1.5px;
-  }
-
-  &[data-unread='1'] {
-    opacity: 0.55;
-  }
-}
-
-.pastSwatch {
-  @include peak-ramp;
-  display: inline-block;
-  width: 14px;
-  height: 10px;
-  border-radius: 3px;
-}
-
-.swatchCurrent {
-  outline: 1.5px dashed ink(40%);
-  outline-offset: -1.5px;
-}
-
-.windowList {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-
-  li {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 9px 0;
-    border-top: 1px solid var(--border-color);
-    font-size: 13.5px;
-    color: var(--text-secondary);
-
-    > span:first-child {
-      font-weight: 550;
-      font-variant-numeric: tabular-nums;
-      color: var(--text-primary);
-    }
-
-    small {
-      margin-left: 8px;
-      font-weight: 400;
-      color: var(--text-quaternary);
-    }
-
-    &[data-hit='1'] > span:last-child {
-      color: $danger;
-    }
-  }
-}
-
-/* ------------------------------------------------------------ trends */
-
-.weekLabel[data-static='1'],
-.track[data-static='1'] {
-  cursor: default;
-}
-
-.row[data-current='1'] {
-  background: ink(3%);
-}
-
-.cell[data-projected='1'] {
-  opacity: 0.45;
-}
-
-.runOutDot[data-projected='1'] {
-  background: var(--bg-primary);
-  box-shadow:
-    inset 0 0 0 2px $danger,
-    0 0 0 2px var(--bg-primary);
-}
-
-.swatchProjected {
-  background: ink(14%);
-  outline: 1px dashed ink(55%);
-  outline-offset: -1px;
-}
-
-.barWithin[data-projected='1'],
-.barOver[data-projected='1'] {
-  fill-opacity: 0.4;
-  stroke: ink(60%);
-  stroke-width: 1;
-  stroke-dasharray: 3 2;
-}
-
-.measuredDot {
-  fill: var(--text-primary);
-  stroke: var(--bg-primary);
-  stroke-width: 2;
-}
-
-.projectedDot {
-  fill: var(--bg-primary);
-  stroke: var(--text-primary);
-  stroke-width: 1.6;
-}
-
-.lastedDot {
-  fill: none;
-  stroke: ink(40%);
-  stroke-width: 1.4;
-}
-
-.swatchMeasured {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--text-primary);
-}
-
-.swatchLasted {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1.5px ink(40%);
-}
-
-.subChart[data-flush='1'] {
-  padding-top: 0;
-  border-top: 0;
-}
-
 /* ------------------------------------------------------------ bursts */
 
 $drum-row: 30px;
@@ -1712,7 +1528,7 @@ $drum-row: 30px;
       grid-template-columns: minmax(0, 1fr);
       grid-template-areas: 'track';
 
-      > :not(.axisDays):not(.pastAxis) {
+      > :not(.axisDays) {
         display: none;
       }
     }
@@ -1739,8 +1555,6 @@ $drum-row: 30px;
   .track,
   .weekTracks,
   .axisDays,
-  .pastAxis,
-  .pastTrack,
   .singleText {
     grid-area: track;
   }

@@ -33,7 +33,7 @@ interface Props {
 
 /** A row's line may climb this many rows, into the days above it. */
 const RISE_ROWS = 2.6;
-/** Too little use to say anything about its shape. */
+/** Too little use for the headline to say anything about its shape. */
 const QUIET = 5;
 
 interface Entry {
@@ -94,7 +94,6 @@ export function BurstsPanel({ history, accounts, now, theme }: Props) {
     BURST_LINE * 2,
     Math.ceil(Math.max(0, ...entries.flatMap((e) => e.hours.map((h) => h.used ?? 0))) / RISE_ROWS)
   );
-  const firstFull = entries.find((e) => e.used >= QUIET);
 
   return (
     <>
@@ -103,7 +102,7 @@ export function BurstsPanel({ history, accounts, now, theme }: Props) {
           key={entry.account.name}
           entry={entry}
           scale={scale}
-          showLegend={entry === firstFull}
+          showLegend={entry === entries[0]}
           now={now}
           theme={theme}
           t={t}
@@ -114,7 +113,7 @@ export function BurstsPanel({ history, accounts, now, theme }: Props) {
   );
 }
 
-/** One account's card; an account barely used gets its headline alone. */
+/** One account's card, charted even when barely used, so the quiet shows as a flat line. */
 function BurstCard({
   entry,
   scale,
@@ -136,10 +135,9 @@ function BurstCard({
   const biggest = [...entry.bursts].sort((a, b) => b.used - a.used)[0] ?? null;
   const burst = entry.bursts.find((b) => b.start === burstAt) ?? biggest;
   const { headline, sub } = burstHeadline(entry, biggest, now, t, language);
-  const quiet = entry.used < QUIET;
 
   return (
-    <section className={styles.card} data-compact={quiet ? 1 : 0}>
+    <section className={styles.card}>
       <header className={styles.cardHead}>
         <div className={styles.cardTitle}>
           <ProviderIcon provider={entry.account.provider} theme={theme} size={22} />
@@ -150,71 +148,65 @@ function BurstCard({
         </div>
       </header>
 
-      {!quiet && (
-        <div className={styles.layout}>
-          <div className={styles.main}>
-            <div className={styles.drum}>
-              <div className={styles.drumAxis}>
-                <span />
-                <div className={styles.drumHours}>
-                  {[0, 3, 6, 9, 12, 15, 18, 21].map((hour) => (
-                    <span
-                      key={hour}
-                      style={{ left: `${(hour / 24) * 100}%` }}
-                      data-minor={hour % 6 ? 1 : 0}
-                    >
-                      {String(hour).padStart(2, '0')}
-                    </span>
-                  ))}
-                </div>
-                <span className={styles.drumTotalHead}>{t('usage.bursts_per_day')}</span>
+      <div className={styles.layout}>
+        <div className={styles.main}>
+          <div className={styles.drum}>
+            <div className={styles.drumAxis}>
+              <span />
+              <div className={styles.drumHours}>
+                {[0, 3, 6, 9, 12, 15, 18, 21].map((hour) => (
+                  <span
+                    key={hour}
+                    style={{ left: `${(hour / 24) * 100}%` }}
+                    data-minor={hour % 6 ? 1 : 0}
+                  >
+                    {String(hour).padStart(2, '0')}
+                  </span>
+                ))}
               </div>
-              {entry.days.map((day) => (
-                <DrumRow
-                  key={day.dayStart}
-                  day={day}
-                  bursts={entry.bursts}
-                  windows={entry.windows}
-                  scale={scale}
-                  selected={burst}
-                  onSelect={setBurstAt}
-                  now={now}
-                  t={t}
-                />
-              ))}
+              <span className={styles.drumTotalHead}>{t('usage.bursts_per_day')}</span>
             </div>
-            {showLegend && (
-              <footer className={styles.legend}>
-                <LegendItem swatch={styles.swatchHourLine}>
-                  {t('usage.legend_hour_line', { value: pct(scale) })}
-                </LegendItem>
-                <LegendItem swatch={styles.swatchUsed}>{t('usage.legend_burst')}</LegendItem>
-                <LegendItem swatch={styles.swatchLocked}>
-                  {t('usage.legend_locked_short')}
-                </LegendItem>
-                <LegendItem swatch={styles.swatchRunsOutDot}>
-                  {t('usage.legend_ran_out')}
-                </LegendItem>
-                <LegendItem swatch={styles.swatchReset}>{t('usage.legend_reset')}</LegendItem>
-                <LegendItem swatch={styles.swatchUnread}>{t('usage.legend_no_reading')}</LegendItem>
-                <LegendItem swatch={styles.swatchWork}>{t('usage.legend_work_hours')}</LegendItem>
-                <span className={styles.legendNote}>
-                  {t('usage.bursts_note', { value: pct(BURST_LINE) })}
-                </span>
-              </footer>
-            )}
+            {entry.days.map((day) => (
+              <DrumRow
+                key={day.dayStart}
+                day={day}
+                bursts={entry.bursts}
+                windows={entry.windows}
+                scale={scale}
+                selected={burst}
+                onSelect={setBurstAt}
+                now={now}
+                t={t}
+              />
+            ))}
           </div>
-
-          <BurstDetail
-            entry={entry}
-            burst={burst}
-            onSelect={setBurstAt}
-            theme={theme}
-            t={t}
-            language={language}
-          />
+          {showLegend && (
+            <footer className={styles.legend}>
+              <LegendItem swatch={styles.swatchHourLine}>
+                {t('usage.legend_hour_line', { value: pct(scale) })}
+              </LegendItem>
+              <LegendItem swatch={styles.swatchUsed}>{t('usage.legend_burst')}</LegendItem>
+              <LegendItem swatch={styles.swatchLocked}>{t('usage.legend_locked_short')}</LegendItem>
+              <LegendItem swatch={styles.swatchRunsOutDot}>{t('usage.legend_ran_out')}</LegendItem>
+              <LegendItem swatch={styles.swatchReset}>{t('usage.legend_reset')}</LegendItem>
+              <LegendItem swatch={styles.swatchUnread}>{t('usage.legend_no_reading')}</LegendItem>
+              <LegendItem swatch={styles.swatchWork}>{t('usage.legend_work_hours')}</LegendItem>
+              <span className={styles.legendNote}>
+                {t('usage.bursts_note', { value: pct(BURST_LINE) })}
+              </span>
+            </footer>
+          )}
         </div>
-      )}
+
+        <BurstDetail
+          entry={entry}
+          burst={burst}
+          onSelect={setBurstAt}
+          theme={theme}
+          t={t}
+          language={language}
+        />
+      </div>
     </section>
   );
 }
@@ -657,7 +649,8 @@ function SplitBars({
   t: TFunction;
   language: string;
 }) {
-  if (splits.length === 0) return null;
+  // The current window alone has nothing to compare with yet.
+  if (!splits.some((split) => !split.window.current)) return null;
   const plotW = SPLIT.width - SPLIT.left - SPLIT.right;
   const plotH = SPLIT.height - SPLIT.top - SPLIT.bottom;
   const slot = plotW / splits.length;

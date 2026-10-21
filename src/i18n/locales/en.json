@@ -2153,6 +2153,6 @@
     "trend_headline_due": "{{account}}'s first trend is due around {{date}}",
     "trend_headline_wait": "{{account}} needs more recorded weeks for a trend",
     "trend_sub_progress": "Finished weeks recorded: {{have}} of the {{needed}} a trend needs.",
-    "bursts_headline_out": "{{account}} is out until {{time}}, so it has no use to chart"
+    "bursts_headline_out": "{{account}} is out until {{time}}"
   }
 }

@@ -2181,6 +2181,6 @@
     "trend_headline_due": "Первый тренд {{account}} ожидается около {{date}}",
     "trend_headline_wait": "Для тренда {{account}} нужно больше записанных недель",
     "trend_sub_progress": "Записано законченных недель: {{have}} из {{needed}}, нужных для тренда.",
-    "bursts_headline_out": "{{account}} исчерпан до {{time}}, расхода для графика нет"
+    "bursts_headline_out": "{{account}} исчерпан до {{time}}"
   }
 }

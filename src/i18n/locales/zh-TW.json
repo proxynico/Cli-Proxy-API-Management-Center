@@ -2160,6 +2160,6 @@
     "trend_headline_due": "{{account}} 的第一條趨勢預計在 {{date}} 左右出現",
     "trend_headline_wait": "{{account}} 需要記錄更多週才能顯示趨勢",
     "trend_sub_progress": "已記錄完整的週：{{have}}，趨勢需要 {{needed}}。",
-    "bursts_headline_out": "{{account}} 已用盡，直到 {{time}}，暫無用量可畫"
+    "bursts_headline_out": "{{account}} 已用盡，直到 {{time}}"
   }
 }
